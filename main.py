@@ -49,7 +49,7 @@ def initialize_teams():
 
     if count == 0:
         for i in range(1, 26):  # Team 1 to Team 25
-            cursor.execute("INSERT INTO teams (name, score) VALUES (?, ?)", (f"Team {i}", 0))
+            cursor.execute("INSERT INTO teams (name, score) VALUES (?, ?)", (f"Team {i}", random.randrange(50, 2050, 50)))
         conn.commit()
 
     conn.close()
