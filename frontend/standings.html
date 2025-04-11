@@ -1,23 +1,86 @@
-<!-- standings.html -->
-<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Team Standings</title>
+  <style>
+    body {
+      background-color: #202027;
+      color: white;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    #chart {
+      width: 90%;
+      max-width: 800px;
+      margin: 2rem auto;
+    }
+
+    .bar {
+      display: flex;
+      align-items: center;
+      margin: 0.3rem 0;
+    }
+
+    .bar-name {
+      width: 25%;
+    }
+
+    .bar-fill {
+      height: 24px;
+      background: #4caf50;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    .logo {
+      width: 200px;
+      margin: auto;
+      padding: 2rem;
+    }
+  </style>
 </head>
 <body>
   <h1>Team Standings</h1>
-  <ul id="standings"></ul>
+  <div id="chart"></div>
+  <div class="logo">
+    <img src="IMG_2613.png" alt="Unofficial MET Logo" style="width: 100%;">
+  </div>
 
   <script>
     fetch('/standings')
       .then(res => res.json())
       .then(data => {
-        const list = document.getElementById('standings');
+        data.sort((a, b) => b.score - a.score); // rank ordered
+
+        const chart = document.getElementById('chart');
+        const maxScore = Math.max(...data.map(t => t.score), 1); // avoid divide by 0
+
         data.forEach(team => {
-          const item = document.createElement('li');
-          item.textContent = `${team.name}: ${team.score} points`;
-          list.appendChild(item);
+          const row = document.createElement('div');
+          row.className = 'bar';
+
+          const name = document.createElement('div');
+          name.className = 'bar-name';
+          name.textContent = team.name;
+
+          const bar = document.createElement('div');
+          bar.className = 'bar-fill';
+          bar.style.width = (team.score / maxScore * 100) + '%';
+          bar.textContent = team.score + ' pts';
+
+          row.appendChild(name);
+          row.appendChild(bar);
+          chart.appendChild(row);
         });
       });
   </script>

@@ -36,7 +36,23 @@ def init_db():
     conn.commit()
     conn.close()
 
+def initialize_teams():
+    conn = sqlite3.connect("app.db")
+    cursor = conn.cursor()
+
+    # Check if any teams already exist
+    cursor.execute("SELECT COUNT(*) FROM teams")
+    count = cursor.fetchone()[0]
+
+    if count == 0:
+        for i in range(1, 26):  # Team 1 to Team 25
+            cursor.execute("INSERT INTO teams (name, score) VALUES (?, ?)", (f"Team {i}", 0))
+        conn.commit()
+
+    conn.close()
+
 init_db()
+initialize_teams()
 
 # --- Models ---
 class TeamScoreAdjust(BaseModel):
