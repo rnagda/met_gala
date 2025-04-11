@@ -1,0 +1,48 @@
+<!-- responses.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Score Responses</title>
+</head>
+<body>
+  <h1>Pending Responses</h1>
+  <div id="responses"></div>
+
+  <script>
+    async function loadResponses() {
+      const res = await fetch('/pending_responses');
+      const data = await res.json();
+      const container = document.getElementById('responses');
+      container.innerHTML = '';
+
+      data.forEach(response => {
+        const div = document.createElement('div');
+        div.innerHTML = `
+          <p><strong>Team ${response.team_id}</strong>: ${response.content}</p>
+          <form onsubmit="submitScore(event, ${response.id})">
+            <label>Points: <input type="number" name="points" required></label>
+            <button type="submit">Score</button>
+          </form>
+          <hr>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    async function submitScore(event, id) {
+      event.preventDefault();
+      const form = event.target;
+      const points = +form.elements['points'].value;
+      const res = await fetch('/score_response', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ response_id: id, points })
+      });
+      await loadResponses();
+    }
+
+    loadResponses();
+  </script>
+</body>
+</html>
