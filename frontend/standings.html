@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -68,11 +67,12 @@
     fetch('/standings')
       .then(res => res.json())
       .then(data => {
+        console.log(data)
+
         data.sort((a, b) => b.score - a.score); // rank ordered
 
         const chart = document.getElementById('chart');
         const maxScore = Math.max(...data.map(t => t.score), 1); // avoid divide by 0
-        console.log(data)
         data.forEach(team => {
           const row = document.createElement('div');
           row.className = 'bar';

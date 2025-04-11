@@ -74,6 +74,7 @@ def get_standings():
     conn = get_db()
     teams = conn.execute("SELECT * FROM teams ORDER BY score DESC").fetchall()
     conn.close()
+    print(teams)
     return [dict(team) for team in teams]
 
 
