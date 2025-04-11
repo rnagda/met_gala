@@ -36,7 +36,7 @@ def init_db():
             FOREIGN KEY(team_id) REFERENCES teams(id)
         )
     """)
-    cursor.execute("""TRUNCATE TABLE teams""")
+    cursor.execute("""DELETE FROM teams""")
     conn.commit()
     conn.close()
 
