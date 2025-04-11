@@ -1,8 +1,10 @@
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import List
 import sqlite3
+import os
 
 app = FastAPI()
 
@@ -65,12 +67,18 @@ class ScoreResponseInput(BaseModel):
 
 # --- Endpoints ---
 
-@app.get("/standings")
+@app.get("/standings_data")
 def get_standings():
     conn = get_db()
     teams = conn.execute("SELECT * FROM teams ORDER BY score DESC").fetchall()
     conn.close()
     return [dict(team) for team in teams]
+
+
+@app.get("/standings")
+def standings_page():
+    return FileResponse(os.path.join("frontend", "standings.html"))
+
 
 @app.post("/adjust_score")
 def adjust_score(data: TeamScoreAdjust):

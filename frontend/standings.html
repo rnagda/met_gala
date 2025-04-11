@@ -57,7 +57,7 @@
   </div>
 
   <script>
-    fetch('/standings')
+    fetch('/standings_data')
       .then(res => res.json())
       .then(data => {
         data.sort((a, b) => b.score - a.score); // rank ordered
