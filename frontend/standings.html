@@ -72,7 +72,7 @@
 
         const chart = document.getElementById('chart');
         const maxScore = Math.max(...data.map(t => t.score), 1); // avoid divide by 0
-
+        console.log(data)
         data.forEach(team => {
           const row = document.createElement('div');
           row.className = 'bar';
