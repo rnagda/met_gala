@@ -37,7 +37,7 @@ def init_db():
     conn.close()
 
 def initialize_teams():
-    conn = sqlite3.connect("app.db")
+    conn = sqlite3.connect("teams.db")
     cursor = conn.cursor()
 
     # Check if any teams already exist
