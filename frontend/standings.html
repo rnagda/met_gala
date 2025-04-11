@@ -1,0 +1,25 @@
+<!-- standings.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Team Standings</title>
+</head>
+<body>
+  <h1>Team Standings</h1>
+  <ul id="standings"></ul>
+
+  <script>
+    fetch('/standings')
+      .then(res => res.json())
+      .then(data => {
+        const list = document.getElementById('standings');
+        data.forEach(team => {
+          const item = document.createElement('li');
+          item.textContent = `${team.name}: ${team.score} points`;
+          list.appendChild(item);
+        });
+      });
+  </script>
+</body>
+</html>
