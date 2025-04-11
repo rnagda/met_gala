@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -40,6 +41,11 @@
       background: #4caf50;
       border-radius: 4px;
       transition: width 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 8px;
+      white-space: nowrap;
     }
 
     .logo {
@@ -48,16 +54,17 @@
       padding: 2rem;
     }
   </style>
+  <link rel="icon" type="image/png" href="favicon.png">
 </head>
 <body>
   <h1>Team Standings</h1>
   <div id="chart"></div>
   <div class="logo">
-    <img src="IMG_2613.png" alt="Unofficial MET Logo" style="width: 100%;">
+    <img src="umang_logo.png" alt="Unofficial MET Logo" style="width: 100%;">
   </div>
 
   <script>
-    fetch('/standings_data')
+    fetch('/standings')
       .then(res => res.json())
       .then(data => {
         data.sort((a, b) => b.score - a.score); // rank ordered
