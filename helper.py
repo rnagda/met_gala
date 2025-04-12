@@ -23,6 +23,10 @@ def authenticate_google_drive():
     if os.path.exists('token.pickle'):
         with open('token.pickle', 'rb') as token:
             creds = pickle.load(token)
+
+    creds_path = "credentials.json"
+    with open(creds_path, "w") as f:
+        json.dump(json.loads(os.environ["GOOGLE_CREDS_JSON"]), f)
     
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
