@@ -150,7 +150,7 @@ async def poll_for_new_files():
                     match_found = False
                     if "yes" in compareGPT(file_name, f'correct_images/{object_name}.jpg').lower():
                         match_found = True
-                    points = 0 if not match_found else 100 if d[2] == 'Person' and object_type == 'Person' else 50 if object_type == 'Bonus' else 0
+                    points = 0 if not match_found else 100 if d[2] == 'Person' and object_type == 'Person' else 50 if object_type == 'Bonus Item' else 0
                     cursor.execute("""INSERT INTO responses (team_name, file_id, file_name, points, object_name) VALUES (?, ?, ?, ?, ?)""", (team_name, file_id, file_name, points, object_name))
                     cursor.execute("UPDATE teams SET score = score + ? WHERE name = ?", (points, team_name))
             conn.commit()
