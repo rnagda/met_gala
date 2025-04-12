@@ -92,8 +92,8 @@ def get_standings():
 @app.get("/reset_db_i_am_sure")
 def get_standings():
     conn = get_db()
-    conn.execute("DROP IF EXISTS teams")
-    conn.execute("DROP IF EXISTS responses")
+    conn.execute("DROP TABLE IF EXISTS teams")
+    conn.execute("DROP TABLE IF EXISTS responses")
     conn.close()
     init_db()
     initialize_teams()
