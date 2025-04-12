@@ -40,8 +40,8 @@ def init_db():
             object_name TEXT,
             file_id TEXT,
             file_name TEXT, 
-            points INTEGER DEFAULT 0,
-            PRIMARY KEY(team_name, object_name)
+            points INTEGER,
+            PRIMARY KEY(team_name, object_name, points)
             FOREIGN KEY(team_name) REFERENCES teams(name)
         )
     """)
