@@ -2,7 +2,6 @@ import os
 import io
 import pickle
 import subprocess
-import numpy as np
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
