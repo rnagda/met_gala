@@ -11,7 +11,6 @@
       padding: 0;
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
     }
 
     h1 {
@@ -20,23 +19,25 @@
     }
 
     #chart {
-      width: 90%;
-      max-width: 800px;
-      margin: 2rem auto;
+      width: 95%;
+      /* max-width: 800px; */
+      margin: 0.5rem auto;
     }
 
     .bar {
       display: flex;
       align-items: center;
-      margin: 0.3rem 0;
+      margin: 1rem 0;
+      font-size: 18px;
     }
 
     .bar-name {
-      width: 25%;
+      width: 150px;
+      font-size: 22px;
     }
 
     .bar-fill {
-      height: 24px;
+      height: 40px;
       background: #4caf50;
       border-radius: 4px;
       transition: width 0.3s ease;
@@ -45,13 +46,12 @@
       justify-content: flex-end;
       padding-right: 8px;
       white-space: nowrap;
-      min-width: 40px; /* 👈 add this line */
     }
 
     .logo {
-      width: 200px;
+      width: 400px;
       margin: auto;
-      padding: 2rem;
+      padding: 0.2rem;
     }
   </style>
   <link rel="icon" type="image/png" href="favicon.png">
@@ -67,8 +67,6 @@
     fetch('/standings')
       .then(res => res.json())
       .then(data => {
-        console.log(data)
-
         data.sort((a, b) => b.score - a.score); // rank ordered
 
         const chart = document.getElementById('chart');
@@ -83,7 +81,7 @@
 
           const bar = document.createElement('div');
           bar.className = 'bar-fill';
-          bar.style.width = (team.score / maxScore * 100) + '%';
+          bar.style.width = (team.score / maxScore * 90) + '%';
           bar.textContent = team.score + ' pts';
 
           row.appendChild(name);

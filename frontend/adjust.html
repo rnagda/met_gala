@@ -1,30 +1,93 @@
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Adjust Score</title>
+    <meta charset="UTF-8">
+    <title>Adjust Points</title>
+    <style>
+        body {
+        background-color: #202027;
+        color: white;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        }
+
+        h1 {
+        text-align: center;
+        margin-top: 2rem;
+        }
+
+        form {
+        width: 90%;
+        max-width: 600px;
+        margin: 2rem auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        }
+
+        select, input, button {
+        padding: 1rem;
+        font-size: 2rem;
+        border-radius: 4px;
+        border: none;
+        }
+
+        button {
+        background-color: #4caf50;
+        color: white;
+        cursor: pointer;
+        }
+
+        .logo {
+        width: 300px;
+        margin: auto;
+        padding: 0.2rem;
+        }
+    </style>
+    <link rel="icon" type="image/png" href="favicon.png">
 </head>
 <body>
-  <h1>Adjust Team Score</h1>
-  <form id="scoreForm">
-    <label>Team ID: <input type="number" id="team_id" required></label><br>
-    <label>Change (+/-): <input type="number" id="change" required></label><br>
+  <h1>Adjust Team Points</h1>
+  <form id="adjustForm">
+    <select name="team" id="teamSelect"></select>
+    <input type="number" name="adjustment" placeholder="Points Adjustment (e.g. +100 or -50)" required>
     <button type="submit">Submit</button>
   </form>
-  <p id="result"></p>
+  <div class="logo">
+    <img src="umang_logo.png" alt="Unofficial MET Logo" style="width: 100%;">
+  </div>
 
   <script>
-    document.getElementById('scoreForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const team_id = +document.getElementById('team_id').value;
-      const change = +document.getElementById('change').value;
+    fetch('/teams')
+      .then(res => res.json())
+      .then(data => {
+        const select = document.getElementById('teamSelect');
+        data.forEach(team => {
+          const option = document.createElement('option');
+          option.value = team.name;
+          option.textContent = team.name;
+          select.appendChild(option);
+        });
+      });
 
-      const res = await fetch('/adjust_score', {
+    document.getElementById('adjustForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const team = document.getElementById('teamSelect').value;
+      const adjustment = parseInt(this.adjustment.value);
+      fetch('/adjust', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ team_id, change })
+        body: JSON.stringify({ team, adjustment })
+      }).then(res => {
+        if (res.ok) {
+          alert('Score updated!');
+          location.reload();
+        } else {
+          alert('Error updating score.');
+        }
       });
-      const msg = await res.json();
-      document.getElementById('result').textContent = msg.message || msg.detail;
     });
   </script>
 </body>

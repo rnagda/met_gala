@@ -3,9 +3,13 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import List
+from helper import authenticate_google_drive, authenticate_google_sheet, compareGPT, download_and_convert, parse_google_sheet
+import asyncio
 import os
 import random
 import sqlite3
+import traceback
+
 
 app = FastAPI()
 
@@ -28,15 +32,14 @@ def init_db():
     """)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS responses (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            team_id INTEGER,
-            content TEXT,
-            is_scored BOOLEAN DEFAULT FALSE,
+            team_name TEXT,
+            file_id TEXT,
+            file_name TEXT, 
             points INTEGER DEFAULT 0,
-            FOREIGN KEY(team_id) REFERENCES teams(id)
+            PRIMARY KEY(team_name, file_id)
+            FOREIGN KEY(team_name) REFERENCES teams(name)
         )
     """)
-    cursor.execute("""DELETE FROM teams""")
     conn.commit()
     conn.close()
 
@@ -50,7 +53,7 @@ def initialize_teams():
 
     if count == 0:
         for i in range(1, 26):  # Team 1 to Team 25
-            cursor.execute("INSERT INTO teams (name, score) VALUES (?, ?)", (f"Team {i}", random.randrange(50, 2050, 50)))
+            cursor.execute("INSERT INTO teams (name, score) VALUES (?, ?)", (f"Team {i}", 0))
         conn.commit()
 
     conn.close()
@@ -59,61 +62,89 @@ init_db()
 initialize_teams()
 
 # --- Models ---
-class TeamScoreAdjust(BaseModel):
-    team_id: int
-    change: int
-
 class ScoreResponseInput(BaseModel):
     response_id: int
     points: int
 
+class Adjustment(BaseModel):
+    team: str
+    adjustment: int
+
 # --- Endpoints ---
 
-@app.get("/standings_data")
+@app.get("/standings")
 def get_standings():
     conn = get_db()
     teams = conn.execute("SELECT * FROM teams ORDER BY score DESC").fetchall()
     conn.close()
-    print(teams)
-    return [{"name": "Team 1", "score": 50}, {"name": "Team 2", "score": 30}]
+    return teams
+
+@app.get("/teams")
+def get_standings():
+    conn = get_db()
+    teams = conn.execute("SELECT * FROM teams ORDER BY id ASC").fetchall()
+    conn.close()
+    return teams
 
 
-@app.get("/standings")
+@app.get("/met_standings")
 def standings_page():
     return FileResponse(os.path.join("frontend", "standings.html"))
 
+@app.get("/adjust")
+def show_adjust_page():
+    return FileResponse(os.path.join("frontend", "adjust.html"))
 
-@app.post("/adjust_score")
-def adjust_score(data: TeamScoreAdjust):
+
+@app.post("/adjust")
+def adjust_score(data: Adjustment):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("UPDATE teams SET score = score + ? WHERE id = ?", (data.change, data.team_id))
+    cursor.execute("UPDATE teams SET score = score + ? WHERE name = ?", (data.adjustment, data.team))
     if cursor.rowcount == 0:
         raise HTTPException(status_code=404, detail="Team not found")
     conn.commit()
     conn.close()
     return {"message": "Score updated"}
 
-@app.get("/pending_responses")
-def get_pending_responses():
-    conn = get_db()
-    responses = conn.execute("SELECT * FROM responses WHERE is_scored = 0").fetchall()
-    conn.close()
-    return [dict(response) for response in responses]
 
-@app.post("/score_response")
-def score_response(data: ScoreResponseInput):
-    conn = get_db()
-    cursor = conn.cursor()
-    response = cursor.execute("SELECT * FROM responses WHERE id = ? AND is_scored = 0", (data.response_id,)).fetchone()
-    if not response:
-        raise HTTPException(status_code=404, detail="Response not found or already scored")
+async def poll_for_new_files():
+    await asyncio.sleep(5)  # optional: short delay before first run
+    drive_service = authenticate_google_drive()
+    sheets_service = authenticate_google_sheet()
+    data = parse_google_sheet(sheets_service)
 
-    cursor.execute("UPDATE responses SET is_scored = 1, points = ? WHERE id = ?", (data.points, data.response_id))
-    cursor.execute("UPDATE teams SET score = score + ? WHERE id = ?", (data.points, response["team_id"]))
-    conn.commit()
-    conn.close()
-    return {"message": "Response scored and team updated"}
+    while True:
+        try:
+            conn = get_db()
+            cursor = conn.cursor()
+            for d in data:
+                file_id = d[3].split("id=")[-1]
+                team_name = d[1]
+                file_name = drive_service.files().get(fileId=file_id, fields='name').execute()['name']
+                output_file_name = f'submissions/{file_name}'.replace('heic', 'jpg')
+                cursor.execute("""SELECT 1 FROM responses WHERE team_name = ? AND file_name = ? AND file_id = ?""", (team_name, output_file_name, file_id))
+                exists = cursor.fetchone() is not None
+                print(exists)
+                if not exists:
+                    file_name = download_and_convert(drive_service, file_id, file_name)
+                    match_found = False
+                    for image in [f'correct_images/{i}.jpg' for i in range(1, 16)]:
+                        if "yes" in compareGPT(file_name, image).lower():
+                            match_found = True
+                            break
+                    points = 0 if not match_found else 100 if d[2] == 'Regular Clue' else 50
+                    cursor.execute("""INSERT INTO responses (team_name, file_id, file_name, points) VALUES (?, ?, ?, ?)""", (team_name, file_id, file_name, points))
+                    cursor.execute("UPDATE teams SET score = score + ? WHERE name = ?", (points, team_name))
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            print(f"Error checking files: {traceback.print_exc()}")
 
+        await asyncio.sleep(30)  # run every 30 seconds
+
+@app.on_event("startup")
+async def startup_event():
+    asyncio.create_task(poll_for_new_files())
 
 app.mount("/", StaticFiles(directory="frontend", html=True), name="static")
