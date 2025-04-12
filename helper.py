@@ -107,7 +107,12 @@ def convert_heic_to_jpg_cli(input_path, output_path):
 def download_and_convert(service, file_id, file_name):
     # Step 1: Download the file
     request = service.files().get_media(fileId=file_id)
-    file_path = 'submissions/' + file_name
+
+    # Ensure the submissions folder exists
+    os.makedirs("submissions", exist_ok=True)
+
+    # Then download the file
+    file_path = os.path.join("submissions", file_name)
     fh = io.FileIO(file_path, 'wb')
     downloader = MediaIoBaseDownload(fh, request)
     done = False
