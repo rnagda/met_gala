@@ -57,38 +57,38 @@
   <link rel="icon" type="image/png" href="favicon.png">
 </head>
 <body>
-  <h1>Team Standings</h1>
-  <div id="chart"></div>
-  <div class="logo">
-    <img src="umang_logo.png" alt="Unofficial MET Logo" style="width: 100%;">
-  </div>
+    <div class="logo">
+        <img src="umang_logo.png" alt="Unofficial MET Logo" style="width: 100%;">
+    </div>
+    <h1>Team Standings</h1>
+    <div id="chart"></div>
 
-  <script>
-    fetch('/standings')
-      .then(res => res.json())
-      .then(data => {
-        data.sort((a, b) => b.score - a.score); // rank ordered
+    <script>
+        fetch('/standings')
+        .then(res => res.json())
+        .then(data => {
+            data.sort((a, b) => b.score - a.score); // rank ordered
 
-        const chart = document.getElementById('chart');
-        const maxScore = Math.max(...data.map(t => t.score), 1); // avoid divide by 0
-        data.forEach(team => {
-          const row = document.createElement('div');
-          row.className = 'bar';
+            const chart = document.getElementById('chart');
+            const maxScore = Math.max(...data.map(t => t.score), 1); // avoid divide by 0
+            data.forEach(team => {
+            const row = document.createElement('div');
+            row.className = 'bar';
 
-          const name = document.createElement('div');
-          name.className = 'bar-name';
-          name.textContent = team.name;
+            const name = document.createElement('div');
+            name.className = 'bar-name';
+            name.textContent = team.name;
 
-          const bar = document.createElement('div');
-          bar.className = 'bar-fill';
-          bar.style.width = (team.score / maxScore * 90) + '%';
-          bar.textContent = team.score + ' pts';
+            const bar = document.createElement('div');
+            bar.className = 'bar-fill';
+            bar.style.width = (team.score / maxScore * 90) + '%';
+            bar.textContent = team.score + ' pts';
 
-          row.appendChild(name);
-          row.appendChild(bar);
-          chart.appendChild(row);
+            row.appendChild(name);
+            row.appendChild(bar);
+            chart.appendChild(row);
+            });
         });
-      });
-  </script>
+    </script>
 </body>
 </html>
