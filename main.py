@@ -89,11 +89,22 @@ def get_standings():
     return teams
 
 
+@app.get("/reset_db_i_am_sure")
+def get_standings():
+    conn = get_db()
+    conn.execute("DROP IF EXISTS teams")
+    conn.execute("DROP IF EXISTS responses")
+    conn.close()
+    init_db()
+    initialize_teams()
+    return []
+
+
 @app.get("/met_standings")
 def standings_page():
     return FileResponse(os.path.join("frontend", "standings.html"))
 
-@app.get("/adjust")
+@app.get("/umangs_secret_adjust")
 def show_adjust_page():
     return FileResponse(os.path.join("frontend", "adjust.html"))
 
