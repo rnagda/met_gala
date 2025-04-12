@@ -34,9 +34,10 @@ def authenticate_google_drive():
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
-            creds = flow.run_local_server(port=0)
+            creds = service_account.Credentials.from_service_account_info(
+                json.loads(os.getenv("GOOGLE_CREDS_JSON")),
+                scopes=SCOPES
+            )
         # Save the credentials for the next run
         with open('token.pickle', 'wb') as token:
             pickle.dump(creds, token)
