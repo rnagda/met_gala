@@ -125,10 +125,11 @@ async def poll_for_new_files():
     await asyncio.sleep(5)  # optional: short delay before first run
     drive_service = authenticate_google_drive()
     sheets_service = authenticate_google_sheet()
-    data = parse_google_sheet(sheets_service)
 
     while True:
+        print('Polling')
         try:
+            data = parse_google_sheet(sheets_service)
             conn = get_db()
             cursor = conn.cursor()
             for d in data:
@@ -154,7 +155,7 @@ async def poll_for_new_files():
         except Exception as e:
             print(f"Error checking files: {traceback.print_exc()}")
 
-        await asyncio.sleep(30)  # run every 30 seconds
+        await asyncio.sleep(20)  # run every 20 seconds
 
 @app.on_event("startup")
 async def startup_event():
