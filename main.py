@@ -54,7 +54,7 @@ def initialize_teams():
     count = cursor.fetchone()[0]
 
     if count == 0:
-        for i in range(1, 26):  # Team 1 to Team 25
+        for i in range(1, 31):  # Team 1 to Team 30
             cursor.execute("INSERT INTO teams (name, score) VALUES (?, ?)", (f"Team {i}", 0))
         conn.commit()
 
@@ -135,7 +135,7 @@ async def poll_for_new_files():
                         if "yes" in compareGPT(file_name, image).lower():
                             match_found = True
                             break
-                    points = 0 if not match_found else 100 if d[2] == 'Regular Clue' else 50
+                    points = 0 if not match_found else 100 if d[2] == 'Person' else 50
                     cursor.execute("""INSERT INTO responses (team_name, file_id, file_name, points) VALUES (?, ?, ?, ?)""", (team_name, file_id, file_name, points))
                     cursor.execute("UPDATE teams SET score = score + ? WHERE name = ?", (points, team_name))
             conn.commit()
