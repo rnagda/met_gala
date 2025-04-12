@@ -37,10 +37,11 @@ def init_db():
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS responses (
             team_name TEXT,
+            object_name TEXT,
             file_id TEXT,
             file_name TEXT, 
             points INTEGER DEFAULT 0,
-            PRIMARY KEY(team_name, file_id)
+            PRIMARY KEY(team_name, object_name)
             FOREIGN KEY(team_name) REFERENCES teams(name)
         )
     """)
@@ -138,19 +139,18 @@ async def poll_for_new_files():
                 file_id = d[3].split("id=")[-1]
                 team_name = d[1]
                 file_name = drive_service.files().get(fileId=file_id, fields='name').execute()['name']
+                object_name = d[4].split(':')[-1].lstrip()
                 output_file_name = f'submissions/{file_name}'.replace('heic', 'jpg')
-                cursor.execute("""SELECT 1 FROM responses WHERE team_name = ? AND file_name = ? AND file_id = ?""", (team_name, output_file_name, file_id))
+                cursor.execute("""SELECT 1 FROM responses WHERE team_name = ? AND object_name = ? AND points != 0""", (team_name, object_name))
                 exists = cursor.fetchone() is not None
                 print(exists)
                 if not exists:
                     file_name = download_and_convert(drive_service, file_id, file_name)
                     match_found = False
-                    for image in [f'correct_images/{i}.jpg' for i in range(1, 16)]:
-                        if "yes" in compareGPT(file_name, image).lower():
-                            match_found = True
-                            break
+                    if "yes" in compareGPT(file_name, f'correct_images/{object_name}.jpg').lower():
+                        match_found = True
                     points = 0 if not match_found else 100 if d[2] == 'Person' else 50
-                    cursor.execute("""INSERT INTO responses (team_name, file_id, file_name, points) VALUES (?, ?, ?, ?)""", (team_name, file_id, file_name, points))
+                    cursor.execute("""INSERT INTO responses (team_name, file_id, file_name, points, object_name) VALUES (?, ?, ?, ?, ?)""", (team_name, file_id, file_name, points, object_name))
                     cursor.execute("UPDATE teams SET score = score + ? WHERE name = ?", (points, team_name))
             conn.commit()
             conn.close()

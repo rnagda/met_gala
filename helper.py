@@ -92,7 +92,7 @@ def authenticate_google_sheet():
 def parse_google_sheet(service):
     sheet = service.spreadsheets()
 
-    result = sheet.values().get(spreadsheetId='1NdEXW-DIakyGy6sW6bKayzSOlW4XPlJTSegQ9rltkaQ', range='Form Responses 1!A2:D').execute()
+    result = sheet.values().get(spreadsheetId='1NdEXW-DIakyGy6sW6bKayzSOlW4XPlJTSegQ9rltkaQ', range='Form Responses 1!A2:E').execute()
     values = result.get('values', [])
 
     if not values:
