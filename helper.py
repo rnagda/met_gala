@@ -12,6 +12,8 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 from google.auth.transport.requests import Request
 from google.oauth2 import service_account
+from PIL import Image
+
 
 # If modifying the folder scope, update the SCOPES.
 SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
@@ -101,7 +103,8 @@ def parse_google_sheet(service):
 
 
 def convert_heic_to_jpg_cli(input_path, output_path):
-    subprocess.run(["heif-convert", input_path, output_path], check=True)
+    image = Image.open(input_path)
+    image.save(output_path, format="JPEG")
     return output_path
 
 def download_and_convert(service, file_id, file_name):

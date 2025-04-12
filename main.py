@@ -11,9 +11,11 @@ from pydantic import BaseModel
 from typing import List
 from helper import authenticate_google_drive, authenticate_google_sheet, compareGPT, download_and_convert, parse_google_sheet
 from dotenv import load_dotenv
-load_dotenv()
+from pillow_heif import register_heif_opener
 
+load_dotenv()
 app = FastAPI()
+register_heif_opener()
 
 # --- Database Setup ---
 
