@@ -1,7 +1,6 @@
 import os
 import io
 import pickle
-import cv2
 import subprocess
 from skimage.metrics import structural_similarity as ssim
 import numpy as np
