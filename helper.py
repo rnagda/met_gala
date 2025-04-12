@@ -10,7 +10,6 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 from google.auth.transport.requests import Request
-from api_key import OPEN_AI_API_KEY
 
 # If modifying the folder scope, update the SCOPES.
 SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
@@ -129,7 +128,7 @@ def compareGPT(image1, image2):
 
     # Set your OpenAI API key
     # Load your API key
-    client = openai.OpenAI(api_key=OPEN_AI_API_KEY)
+    client = openai.OpenAI(api_key=os.environ.get('OPEN_AI_API_KEY'))
 
     def encode_image(image_path):
         with open(image_path, "rb") as f:
