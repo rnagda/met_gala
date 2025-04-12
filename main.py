@@ -10,7 +10,8 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import List
 from helper import authenticate_google_drive, authenticate_google_sheet, compareGPT, download_and_convert, parse_google_sheet
-
+from dotenv import load_dotenv
+load_dotenv()
 
 app = FastAPI()
 
