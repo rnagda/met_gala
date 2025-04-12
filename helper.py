@@ -1,6 +1,7 @@
 import base64
 import os
 import io
+import json
 import pickle
 import pyheif
 import openai
