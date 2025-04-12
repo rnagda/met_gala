@@ -2,7 +2,6 @@ import os
 import io
 import pickle
 import subprocess
-from skimage.metrics import structural_similarity as ssim
 import numpy as np
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
@@ -10,8 +9,6 @@ from googleapiclient.http import MediaIoBaseDownload
 from google.auth.transport.requests import Request
 from api_key import OPEN_AI_API_KEY
 import pyheif
-from PIL import Image
-import requests
 import openai
 import base64
 
