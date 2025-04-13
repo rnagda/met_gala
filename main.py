@@ -93,7 +93,7 @@ def get_standings():
 
 
 @app.get("/reset_db_i_am_sure")
-def get_standings():
+def reset_db():
     conn = get_db()
     conn.execute("DROP TABLE IF EXISTS teams")
     conn.execute("DROP TABLE IF EXISTS responses")
@@ -135,7 +135,10 @@ async def poll_for_new_files():
             data = parse_google_sheet(sheets_service)
             conn = get_db()
             cursor = conn.cursor()
-            for d in data:
+            i = 0
+            for d in data[:3]:
+                i += 1
+                print(i)
                 file_id = d[2].split("id=")[-1]
                 team_name = d[1]
                 file_name = drive_service.files().get(fileId=file_id, fields='name').execute()['name']
@@ -151,7 +154,7 @@ async def poll_for_new_files():
                     if "yes" in compareGPT(file_name, f'correct_images/{object_name}.jpg').lower():
                         match_found = True
                     points = 0 if not match_found else 100 if object_type == 'Person' else 50 
-                    cursor.execute("""INSERT INTO responses (team_name, file_id, file_name, points, object_name) VALUES (?, ?, ?, ?, ?)""", (team_name, file_id, file_name, points, object_name))
+                    cursor.execute("""INSERT OR IGNORE INTO responses (team_name, file_id, file_name, points, object_name) VALUES (?, ?, ?, ?, ?)""", (team_name, file_id, file_name, points, object_name))
                     cursor.execute("UPDATE teams SET score = score + ? WHERE name = ?", (points, team_name))
             conn.commit()
             conn.close()
